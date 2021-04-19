@@ -1,5 +1,5 @@
 import * as PIXI from "pixi.js";
-import { Vector2 } from "../utils/MathUtils";
+import { Vector2 } from "./utils/MathUtils";
 
 interface Key {
 	down: boolean;
