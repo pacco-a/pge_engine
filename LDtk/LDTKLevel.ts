@@ -5,7 +5,8 @@ export default class LDTKLevel {
 	public name: string;
 	private levelObj: any;
 	private tileMapLayers: CompositeTilemap[];
-	// private intMaps: number[][][] = [];
+	private _entities: any[] = [];
+
 	private intMaps: any = {};
 
 	constructor(
@@ -22,9 +23,15 @@ export default class LDTKLevel {
 		);
 
 		// make intMaps
-		this.intMaps = this.MakeIntMapFromSpritesheet(projectSpritesheet);
+		this.intMaps = this.MakeIntMapFromSpritesheet();
+
+		// make entities
+		this.MakeEntities();
 	}
 
+	public get entities(): any[] {
+		return this._entities;
+	}
 	/**
 	 * Créer les CompositeTilemap (layers) à partir d'un spritesheet (object) au format
 	 * adapté (qui peut être généré dans tools/spritesheet).
@@ -65,7 +72,7 @@ export default class LDTKLevel {
 		return tilemapLayers;
 	}
 
-	private MakeIntMapFromSpritesheet(spritesheet: PIXI.Spritesheet) {
+	private MakeIntMapFromSpritesheet() {
 		//const intMaps: number[][][] = [];
 		const intMaps: any = {};
 
@@ -105,6 +112,22 @@ export default class LDTKLevel {
 		}
 
 		return intMaps;
+	}
+
+	private MakeEntities() {
+		for (
+			let index = this.levelObj.layerInstances.length;
+			index > 0;
+			index--
+		) {
+			const layerInstance = this.levelObj.layerInstances[index - 1];
+
+			if (layerInstance.__type === "Entities") {
+				for (const entity of layerInstance.entityInstances) {
+					this.entities.push(entity);
+				}
+			}
+		}
 	}
 
 	public GetTileMapLayers(): CompositeTilemap[] {
