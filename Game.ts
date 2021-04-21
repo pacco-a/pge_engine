@@ -42,6 +42,7 @@ export default class Game {
 
 		this.loader.load(() => {
 			this.create();
+			this.start();
 		});
 
 		// ticker
