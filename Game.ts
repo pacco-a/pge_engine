@@ -114,6 +114,10 @@ export default class Game {
 		const dataToReturn: any = this.loader.resources[name].data;
 		return dataToReturn;
 	}
+
+	public AddToStage(...objects: PIXI.DisplayObject[]) {
+		this.stage.addChild(...objects);
+	}
 	//#endregion
 }
 
