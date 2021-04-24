@@ -3,8 +3,20 @@ import * as PIXI from "pixi.js";
 export default class Game {
 	// pixi renderer
 	protected renderer: PIXI.Renderer;
-	protected stage: PIXI.Container;
+	private _stage: PIXI.Container;
 	protected graphics: PIXI.Graphics;
+
+	private _toDisplayObjects: {
+		order: number;
+		object: PIXI.DisplayObject;
+	}[] = [];
+	public get toDisplayObjects(): {
+		order: number;
+		object: PIXI.DisplayObject;
+	}[] {
+		return this._toDisplayObjects;
+	}
+
 	// pixi ticker
 	protected ticker: PIXI.Ticker;
 	// loader
@@ -27,8 +39,8 @@ export default class Game {
 
 		// stage
 
-		this.stage = new PIXI.Container();
-		this.stage.addChild(this.graphics);
+		this._stage = new PIXI.Container();
+		this.AddToStage(15, this.graphics);
 
 		// load ressources THEN call create
 
@@ -42,6 +54,7 @@ export default class Game {
 
 		this.loader.load(() => {
 			this.create();
+			this.renderObjectsToDisplay();
 			this.start();
 		});
 
@@ -72,7 +85,7 @@ export default class Game {
 	 */
 	protected update(dt: number): void {
 		// render the stage
-		this.renderer.render(this.stage);
+		this.renderer.render(this._stage);
 	}
 
 	/**
@@ -89,6 +102,23 @@ export default class Game {
 	 */
 	public start() {
 		this.ticker.start();
+	}
+
+	private renderObjectsToDisplay(): void {
+		this.toDisplayObjects.sort((a, b) => {
+			if (a.order < b.order) {
+				return -1;
+			}
+			if (a.order > b.order) {
+				return 1;
+			}
+
+			// a must be equal to b
+			return 0;
+		});
+		for (const displayObj of this.toDisplayObjects) {
+			this._stage.addChild(displayObj.object);
+		}
 	}
 
 	//#region resources getters
@@ -115,8 +145,8 @@ export default class Game {
 		return dataToReturn;
 	}
 
-	public AddToStage(...objects: PIXI.DisplayObject[]) {
-		this.stage.addChild(...objects);
+	public AddToStage(order: number, object: PIXI.DisplayObject) {
+		this.toDisplayObjects.push({ order: order, object: object });
 	}
 	//#endregion
 }
