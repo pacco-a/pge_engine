@@ -44,9 +44,6 @@ export default class Game {
 
 		// load ressources THEN call create
 
-		/* TODO
-			puis start a la fin de create */
-
 		this.loader = new PIXI.Loader();
 		for (const toload of config.toLoad) {
 			this.loader.add(toload.name, toload.url);
