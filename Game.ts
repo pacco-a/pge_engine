@@ -102,6 +102,7 @@ export default class Game {
 	}
 
 	private renderObjectsToDisplay(): void {
+		this._stage.removeChildren();
 		this.toDisplayObjects.sort((a, b) => {
 			if (a.order < b.order) {
 				return -1;
@@ -144,6 +145,7 @@ export default class Game {
 
 	public AddToStage(order: number, object: PIXI.DisplayObject) {
 		this.toDisplayObjects.push({ order: order, object: object });
+		this.renderObjectsToDisplay();
 	}
 	//#endregion
 }
