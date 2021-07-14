@@ -120,20 +120,26 @@ export default class Game {
 	}
 
 	//#region resources getters
-	public GetLoadedTexture(name: string): PIXI.Texture | undefined {
-		const textureToReturn: PIXI.Texture | undefined = this.loader.resources[
-			name
-		]
-			? this.loader.resources[name].texture
-			: undefined;
+	public GetLoadedTexture(name: string): PIXI.Texture {
+		const textureToReturn = this.loader.resources[name].texture;
+
+		if (!textureToReturn) {
+			throw new Error(
+				`La texture ${name} n'existe pas ou n'est pas chargée`
+			);
+		}
+
 		return textureToReturn;
 	}
 
-	public GetLoadedSpriteseet(name: string): PIXI.Spritesheet | undefined {
-		const spritesheetToReturn: PIXI.Spritesheet | undefined = this.loader
-			.resources[name]
-			? this.loader.resources[name].spritesheet
-			: undefined;
+	public GetLoadedSpriteseet(name: string): PIXI.Spritesheet {
+		const spritesheetToReturn = this.loader.resources[name].spritesheet;
+
+		if (!spritesheetToReturn) {
+			throw new Error(
+				`Le spritesheet ${name} n'existe pas ou n'est pas chargée`
+			);
+		}
 
 		return spritesheetToReturn;
 	}
