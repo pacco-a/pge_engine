@@ -19,8 +19,15 @@ export default class Game {
 
 	// pixi ticker
 	protected ticker: PIXI.Ticker;
-	// loader
-	protected loader: PIXI.Loader;
+
+	// LOADER
+	public static loader: PIXI.Loader = new PIXI.Loader();
+	// loading queue
+	private loadingQueue: {
+		name: string;
+		url: string;
+		callBack?: () => void;
+	}[] = [];
 
 	constructor(config: IGameConfig) {
 		// create renderer
@@ -44,12 +51,11 @@ export default class Game {
 
 		// load ressources THEN call create
 
-		this.loader = new PIXI.Loader();
 		for (const toload of config.toLoad) {
-			this.loader.add(toload.name, toload.url);
+			Game.loader.add(toload.name, toload.url);
 		}
 
-		this.loader.load(() => {
+		Game.loader.load(() => {
 			this.create();
 			this.renderObjectsToDisplay();
 			this.start();
@@ -120,32 +126,30 @@ export default class Game {
 	}
 
 	//#region resources getters
-	public GetLoadedTexture(name: string): PIXI.Texture {
-		const textureToReturn = this.loader.resources[name].texture;
-
-		if (!textureToReturn) {
-			throw new Error(
-				`La texture ${name} n'existe pas ou n'est pas chargée`
-			);
-		}
-
+	public static GetLoadedTexture(name: string): PIXI.Texture | undefined {
+		const textureToReturn: PIXI.Texture | undefined = Game.loader.resources[
+			name
+		]
+			? Game.loader.resources[name].texture
+			: undefined;
 		return textureToReturn;
 	}
 
-	public GetLoadedSpriteseet(name: string): PIXI.Spritesheet {
-		const spritesheetToReturn = this.loader.resources[name].spritesheet;
+	public static GetLoadedSpritesheet(name: string): PIXI.Spritesheet {
+		const potentialSpriteSheetRes = Game.loader.resources[name];
 
-		if (!spritesheetToReturn) {
-			throw new Error(
-				`Le spritesheet ${name} n'existe pas ou n'est pas chargée`
-			);
+		if (!potentialSpriteSheetRes || !potentialSpriteSheetRes.spritesheet) {
+			throw new Error("No sprite sheet found");
 		}
+
+		const spritesheetToReturn: PIXI.Spritesheet =
+			potentialSpriteSheetRes.spritesheet;
 
 		return spritesheetToReturn;
 	}
 
-	public GetLoadedData(name: string): any {
-		const dataToReturn: any = this.loader.resources[name].data;
+	public static GetLoadedData(name: string): any {
+		const dataToReturn: any = Game.loader.resources[name].data;
 		return dataToReturn;
 	}
 
@@ -154,6 +158,61 @@ export default class Game {
 		this.renderObjectsToDisplay();
 	}
 	//#endregion
+
+	/**
+	 * Ajoute des ressources à la queue de chargemenet et les load dès que possible.
+	 * Les callbacks passées dans les objets de ressources seront à la fin de tout le
+	 * loading queue quoi qu'il arrive : inutile d'en faire un usage individuel.
+	 */
+	public AddToLoad(
+		toload: { name: string; url: string; callBack?: () => void }[]
+	) {
+		/**
+		 * Cette array est très IMPORTANTE car durant l'exécution de cet appel
+		 * de cette fonction, d'autres appels de cette même fonction vont être
+		 * fait simultanément dans d'autres partie du code.
+		 *
+		 * Et donc cette liste peut varier durant l'exécution de cet appel
+		 * lui même.
+		 *
+		 * C'est pour quoi il faut bien supprimer UNIQUEMENT les ressources qui ont été
+		 * ajoutée au loader pixi avant l'appel de load et pas simplement toute
+		 * la loadingQueue.
+		 *
+		 * TODO FIXME (POSSIBLE FIX) simplement ajouter les ressources de toload
+		 * après avoir vérifier si "loading" est true & les renvoyés avec la fonction
+		 * AddToLoad dans le timeout.
+		 *
+		 * je sais pas si c'est vraiment plus efficace mais plus propre en tout cas,
+		 * un jour je m'y mettrais peut-être;
+		 */
+		const toRemoveFromQueue: any[] = [];
+		this.loadingQueue.push(...toload);
+
+		if (Game.loader.loading) {
+			setTimeout(() => {
+				this.AddToLoad([]);
+			}, 100);
+			return;
+		}
+
+		for (const ressource of this.loadingQueue) {
+			Game.loader.add(ressource.name, ressource.url);
+
+			toRemoveFromQueue.push(ressource);
+		}
+
+		Game.loader.load(() => {
+			for (const ressource of toRemoveFromQueue) {
+				this.loadingQueue = this.loadingQueue.filter((loadingRes) => {
+					if (loadingRes === ressource) {
+						ressource.callBack();
+					}
+					return loadingRes != ressource;
+				});
+			}
+		});
+	}
 }
 
 interface IGameConfig {

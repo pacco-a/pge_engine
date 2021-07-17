@@ -36,4 +36,14 @@ function findGridPosition(
 	return new Vector2(tileX, tileY);
 }
 
-export { Vector2, findGridPosition };
+function v2Distance(
+	v1: { x: number; y: number },
+	v2: { x: number; y: number }
+) {
+	let a = v1.x - v2.x;
+	let b = v1.y - v2.y;
+
+	return Math.sqrt(a * a + b * b);
+}
+
+export { Vector2, findGridPosition, v2Distance };
