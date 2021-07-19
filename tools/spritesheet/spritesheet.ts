@@ -76,15 +76,9 @@ async function createSpritesheetData(
 				},
 			};
 
-			// console.log(
-			// 	`x = ${tileX}, y = ${tileY}, w = ${tileWidth}, h = ${tileHeight}`
-			// );
-
 			tileIndex++;
 		}
 	}
 
 	return dataObject;
 }
-
-console.log(spritesheetForm);
