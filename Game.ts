@@ -64,9 +64,10 @@ export default class Game {
 		// ticker
 
 		this.ticker = new PIXI.Ticker();
+		this.ticker.maxFPS = 60;
 		this.ticker.add(() => {
 			// update
-			this.update(this.ticker.elapsedMS / 1000);
+			this.update(this.ticker.deltaTime);
 			// draw
 			this.draw();
 		});
@@ -197,7 +198,8 @@ export default class Game {
 		}
 
 		for (const ressource of this.loadingQueue) {
-			Game.loader.add(ressource.name, ressource.url);
+			if (!Game.loader.resources[ressource.name])
+				Game.loader.add(ressource.name, ressource.url);
 
 			toRemoveFromQueue.push(ressource);
 		}
@@ -219,7 +221,6 @@ interface IGameConfig {
 	width: number;
 	height: number;
 	backgroundColor: number;
-	fps: number;
 	view: HTMLCanvasElement;
 	toLoad: { name: string; url: string }[];
 }
