@@ -158,6 +158,10 @@ export default class Game {
 		this.toDisplayObjects.push({ order: order, object: object });
 		this.renderObjectsToDisplay();
 	}
+
+	public RemoveFromStage(child: PIXI.DisplayObject) {
+		this._stage.removeChild(child);
+	}
 	//#endregion
 
 	/**

@@ -46,4 +46,18 @@ function v2Distance(
 	return Math.sqrt(a * a + b * b);
 }
 
-export { Vector2, findGridPosition, v2Distance };
+function average(numbers: number[]) {
+	if (numbers.length > 0) {
+		return numbers.reduce((a, b) => a + b) / numbers.length;
+	} else {
+		return 0;
+	}
+}
+
+function randomInt(min: number, max: number) {
+	min = Math.ceil(min);
+	max = Math.floor(max);
+	return Math.floor(Math.random() * (max - min) + min); //The maximum is exclusive and the minimum is inclusive
+}
+
+export { Vector2, findGridPosition, v2Distance, average, randomInt };
