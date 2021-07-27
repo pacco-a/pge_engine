@@ -93,16 +93,19 @@ export default class Game {
 		this.renderer.render(this._stage);
 		// update les entitées et leurs components
 		for (const entity of this._entities) {
-			entity.update(dt);
-			for (const component of entity.GetComponents()) {
-				component.update(dt);
+			if (entity.isReady) {
+				entity.update(dt);
+				for (const component of entity.GetComponents()) {
+					component.update(dt);
+				}
 			}
 		}
 	}
 
-	protected addEntity(entityToAdd: Entity): void {
+	protected addEntity<Type extends Entity>(entityToAdd: Type): Type {
 		this._entities.push(entityToAdd);
 		entityToAdd.load();
+		return entityToAdd;
 	}
 
 	protected removeEntity(entityToRemove: Entity): void {

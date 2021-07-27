@@ -1,5 +1,5 @@
 import Component from "./Component";
-import CHATGame from "../..";
+import TemplateGame from "../..";
 
 export default abstract class Entity {
 	// component
@@ -9,12 +9,18 @@ export default abstract class Entity {
 	private _componentsNames: string[] = [];
 	// entités filles
 	private _childEntities: Entity[] = [];
-	// loading
+	// loading / ready
+	// . ressources
 	protected abstract urlsToLoad: string[];
+	// . life cycle state
+	private _isReady: boolean = false;
+	public get isReady() {
+		return this._isReady;
+	}
 
 	constructor() {}
 
-	protected addComponent(componentToAdd: Component) {
+	protected addComponent<Type extends Component>(componentToAdd: Type): Type {
 		// vérifier que les component-dépendances du component
 		// - soient présentes sinon throw une erreur.
 		for (const dependentComponent of componentToAdd.dependentComponent) {
@@ -43,6 +49,10 @@ export default abstract class Entity {
 
 		// loader le component
 		componentToAdd.onReady();
+
+		this._isReady = true;
+
+		return componentToAdd;
 	}
 
 	/**
@@ -78,13 +88,24 @@ export default abstract class Entity {
 		// Supprimer la component de la liste des noms
 		this._componentsNames = this._componentsNames.filter(
 			(componentName) => {
-				return componentName != componentToRemove.name;
+				return componentName !== componentToRemove.name;
 			}
 		);
 
 		// Supprimer le component de la liste des components
 		this._components = this._components.filter((component) => {
-			return component != componentToRemove;
+			return component !== componentToRemove;
+		});
+	}
+
+	protected addEntity<Type extends Entity>(entityToAdd: Type): Type {
+		this._childEntities.push(entityToAdd);
+		return entityToAdd;
+	}
+
+	protected removeEntity(entityToRemove: Entity) {
+		this._childEntities = this._childEntities.filter((entity) => {
+			return entity !== entityToRemove;
 		});
 	}
 
@@ -96,14 +117,26 @@ export default abstract class Entity {
 	//#region life-cycle
 
 	public load(): void {
-		CHATGame.Instance.LoadRessources(this.urlsToLoad, this.onReady);
+		TemplateGame.Instance.LoadRessources(this.urlsToLoad, () => {
+			this.onReady();
+		});
 	}
 
 	/**
 	 * Callback appelée dans la boucle principale du jeu.
+	 * (Important d'appeler super.update())
 	 * @param dt Le delta est égal à 1 avec un framerate habituel (60), supérieur si le framerate diminue, inférieur s'il augmente.
 	 */
-	public abstract update(dt: number): void;
+	public update(dt: number): void {
+		for (const entity of this._childEntities) {
+			if (entity.isReady) {
+				entity.update(dt);
+				for (const component of entity.GetComponents()) {
+					component.update(dt);
+				}
+			}
+		}
+	}
 
 	//#endregion
 }

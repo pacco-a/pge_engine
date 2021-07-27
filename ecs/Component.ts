@@ -1,5 +1,5 @@
 import Entity from "./Entity";
-import CHATGame from "../../index";
+import TemplateGame from "../../index";
 
 export default abstract class Component {
 	/** Le nom du component. Donner impérativement le même nom que celui de la class.*/
