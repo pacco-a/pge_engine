@@ -1,11 +1,16 @@
 import Component from "./Component";
+import CHATGame from "../..";
 
 export default abstract class Entity {
-	// COMPONENTS
+	// component
 	private _components: Component[] = [];
 	/** Liste des noms de components pratique pour garder la trace des components
 	 * déjà présents, plutôt que d'itérer sur chaque component à chaque fois. */
 	private _componentsNames: string[] = [];
+	// entités filles
+	private _childEntities: Entity[] = [];
+	// loading
+	protected abstract urlsToLoad: string[];
 
 	constructor() {}
 
@@ -15,7 +20,7 @@ export default abstract class Entity {
 		for (const dependentComponent of componentToAdd.dependentComponent) {
 			if (this._componentsNames.includes(dependentComponent) === false) {
 				throw new Error(`Le component ${dependentComponent} necessaire pour le
-                    component ${componentToAdd.name} n'est pas présent sur l'entitée.`);
+                    component ${componentToAdd.name} n'est pas présent sur l'entité.`);
 			}
 		}
 
@@ -26,17 +31,17 @@ export default abstract class Entity {
 			this._componentsNames.includes(componentToAdd.name)
 		) {
 			throw new Error(`Le component non dupliquable ${componentToAdd.name}
-                 est déjà présent sur l'entitée`);
+                 est déjà présent sur l'entité`);
 		}
 
-		// définir le parent du component sur cette entitée courante
+		// définir le parent du component sur cette entité courante
 		componentToAdd.setParentEntity(this);
 
 		// ajouter le component à la liste des components (et de leur noms)
 		this._componentsNames.push(componentToAdd.name);
 		this._components.push(componentToAdd);
 
-		// après ces opérations le component est prêt à être utilisé
+		// loader le component
 		componentToAdd.onReady();
 	}
 
@@ -52,7 +57,7 @@ export default abstract class Entity {
 
 		if (!componentToReturn) {
 			throw new Error(
-				`Le component ${componentName} n'est pas présent sur l'entitée.`
+				`Le component ${componentName} n'est pas présent sur l'entité.`
 			);
 		}
 
@@ -60,7 +65,7 @@ export default abstract class Entity {
 	}
 
 	/**
-	 * Retourne tous les components enfant de l'entitée.
+	 * Retourne tous les components enfant de l'entité.
 	 */
 	public GetComponents(): Component[] {
 		return this._components;
@@ -83,9 +88,22 @@ export default abstract class Entity {
 		});
 	}
 
+	/** Callback appelée lorsque l'entité est "prete" (possibilité d'intéragir avec entité fille / components),
+	 * N'utiliser le constructeur que pour définir des valeurs de base, pour initialiser.
+	 */
+	public abstract onReady(): void;
+
+	//#region life-cycle
+
+	public load(): void {
+		CHATGame.Instance.LoadRessources(this.urlsToLoad, this.onReady);
+	}
+
 	/**
 	 * Callback appelée dans la boucle principale du jeu.
 	 * @param dt Le delta est égal à 1 avec un framerate habituel (60), supérieur si le framerate diminue, inférieur s'il augmente.
 	 */
 	public abstract update(dt: number): void;
+
+	//#endregion
 }

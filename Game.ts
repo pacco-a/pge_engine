@@ -26,6 +26,8 @@ export default class Game {
 	// entities
 	private _entities: Entity[] = [];
 
+	public static Instance: Game;
+
 	constructor(config: IGameConfig) {
 		// create renderer
 		this.renderer = new PIXI.Renderer({
@@ -34,6 +36,8 @@ export default class Game {
 			height: config.height,
 			backgroundColor: config.backgroundColor,
 		});
+
+		Game.Instance = this;
 
 		// document.body.appendChild(this.renderer.view);
 
@@ -98,6 +102,7 @@ export default class Game {
 
 	protected addEntity(entityToAdd: Entity): void {
 		this._entities.push(entityToAdd);
+		entityToAdd.load();
 	}
 
 	protected removeEntity(entityToRemove: Entity): void {
@@ -175,6 +180,32 @@ export default class Game {
 		this.renderObjectsToDisplay();
 	}
 	//#endregion
+
+	/**
+	 * Permet de charger une ou plusieurs ressources selon leur url.
+	 * @param urls Les ou la url(s) de(s) (la) ressource(s) à charger.
+	 * @param callback La callback executée après le chargement de la ou des ressource(s).
+	 */
+	public LoadRessources(urls: string[], callback: () => void) {
+		if (this.loader.loading) {
+			setTimeout(() => {
+				this.LoadRessources(urls, callback);
+			}, 100);
+			return;
+		}
+
+		// Supprimer les ressources déjà chargées de la liste.
+		for (const url of urls) {
+			if (this.loader.resources[url]) {
+				urls = urls.filter((urlInArray) => {
+					return urlInArray !== url;
+				});
+			}
+		}
+
+		this.loader.add(urls);
+		this.loader.load(callback);
+	}
 }
 
 interface IGameConfig {

@@ -1,17 +1,18 @@
 import Entity from "./Entity";
+import CHATGame from "../../index";
 
 export default abstract class Component {
 	/** Le nom du component. Donner impérativement le même nom que celui de la class.*/
-	abstract readonly name: string;
+	public abstract readonly name: string;
 
 	/** Le component peut-il être présent deux fois sur une même entitée. */
-	abstract readonly isDuplicable: boolean;
+	public abstract readonly isDuplicable: boolean;
 
 	/** Nom des components necessaire au fontionnement de celui ci */
-	abstract readonly dependentComponent: string[];
+	public abstract readonly dependentComponent: string[];
 
 	/** L'entitée qui détient ce component */
-	private _parentEntity: Entity | undefined = undefined;
+	protected _parentEntity: Entity | undefined = undefined;
 
 	/**
 	 * Défini l'entitée parente. Ne doit être utilisée que dans
@@ -36,7 +37,7 @@ export default abstract class Component {
 	}
 
 	/** Callback appelée lorsque le component est "pret",
-	 * c'est à dire quand on peut intéragir avec son entitée parent.
+	 * N'utiliser le constructeur que pour définir des valeurs de base.
 	 */
 	public abstract onReady(): void;
 
