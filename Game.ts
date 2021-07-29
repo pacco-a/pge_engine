@@ -1,3 +1,4 @@
+import * as pl from "planck-js";
 import * as PIXI from "pixi.js";
 import Entity from "./ecs/Entity";
 
@@ -6,6 +7,9 @@ export default class Game {
 	protected renderer: PIXI.Renderer;
 	private _stage: PIXI.Container;
 	protected graphics: PIXI.Graphics;
+
+	// planckjs world
+	private world: pl.World;
 
 	private _toDisplayObjects: {
 		order: number;
@@ -29,6 +33,9 @@ export default class Game {
 	public static Instance: Game;
 
 	constructor(config: IGameConfig) {
+		// singleton
+		Game.Instance = this;
+
 		// create renderer
 		this.renderer = new PIXI.Renderer({
 			view: config.view,
@@ -37,7 +44,10 @@ export default class Game {
 			backgroundColor: config.backgroundColor,
 		});
 
-		Game.Instance = this;
+		// planck js
+		this.world = new pl.World({
+			gravity: new pl.Vec2(1, 1),
+		});
 
 		// document.body.appendChild(this.renderer.view);
 
@@ -55,7 +65,7 @@ export default class Game {
 		this.ticker = new PIXI.Ticker();
 		this.ticker.add(() => {
 			// update
-			this.update(this.ticker.elapsedMS / 1000);
+			this.update(this.ticker.deltaTime);
 			// draw
 			this.draw();
 		});
@@ -94,8 +104,8 @@ export default class Game {
 		// update les entitées et leurs components
 		for (const entity of this._entities) {
 			if (entity.isReady) {
-				entity.update(dt);
-				for (const component of entity.GetComponents()) {
+				entity.superupdate(dt);
+				for (const component of entity.getComponents()) {
 					component.update(dt);
 				}
 			}

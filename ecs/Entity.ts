@@ -1,5 +1,6 @@
 import Component from "./Component";
 import TemplateGame from "../..";
+import CPosition from "../global_components/CPosition";
 
 export default abstract class Entity {
 	// component
@@ -77,7 +78,7 @@ export default abstract class Entity {
 	/**
 	 * Retourne tous les components enfant de l'entité.
 	 */
-	public GetComponents(): Component[] {
+	public getComponents(): Component[] {
 		return this._components;
 	}
 
@@ -96,6 +97,14 @@ export default abstract class Entity {
 		this._components = this._components.filter((component) => {
 			return component !== componentToRemove;
 		});
+	}
+
+	public componentExist(componentName: string): boolean {
+		const compoenentNameToFind = this._componentsNames.find((name) => {
+			return name === componentName;
+		});
+
+		return compoenentNameToFind !== undefined;
 	}
 
 	protected addEntity<Type extends Entity>(entityToAdd: Type): Type {
@@ -124,19 +133,42 @@ export default abstract class Entity {
 
 	/**
 	 * Callback appelée dans la boucle principale du jeu.
-	 * (Important d'appeler super.update())
+	 * Elle gère les opérations de mise à jour des entitées filles et des components et appel la fonction Update pour l'écriture du code
+	 * utilisateur.
 	 * @param dt Le delta est égal à 1 avec un framerate habituel (60), supérieur si le framerate diminue, inférieur s'il augmente.
 	 */
-	public update(dt: number): void {
+	public superupdate(dt: number): void {
+		// console.log(dt);
 		for (const entity of this._childEntities) {
 			if (entity.isReady) {
-				entity.update(dt);
-				for (const component of entity.GetComponents()) {
+				entity.superupdate(dt);
+
+				// si l'entitée fille à un component de position, alors il faut appliquer le offset
+				// - par rapport à la position de la mère.
+				if (
+					entity.componentExist("CPosition") &&
+					this.componentExist("CPosition")
+				) {
+					const thisPosition =
+						this.getComponent<CPosition>("CPosition");
+					entity
+						.getComponent<CPosition>("CPosition")
+						.setOffset(
+							thisPosition.position.x,
+							thisPosition.position.y
+						);
+				}
+
+				for (const component of entity.getComponents()) {
 					component.update(dt);
 				}
 			}
 		}
+
+		this.update(dt);
 	}
+
+	protected abstract update(dt: number): void;
 
 	//#endregion
 }
