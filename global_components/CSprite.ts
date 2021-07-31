@@ -2,7 +2,7 @@ import * as PIXI from "pixi.js";
 import Component from "../../pge_engine/ecs/Component";
 import Entity from "../../pge_engine/ecs/Entity";
 import CPosition from "./CPosition";
-import TemplateGame from "../..";
+import ChatGame from "../..";
 import { Vector2 } from "../../pge_engine/utils/MathUtils";
 
 interface CSpriteOptions {
@@ -59,7 +59,7 @@ export default class CSprite extends Component {
 		}
 		// ajouter le sprite dans le jeu
 		console.log("1");
-		TemplateGame.Instance.AddToStage(this._spriteOrder, this._sprite);
+		ChatGame.Instance.AddToStage(this._spriteOrder, this._sprite);
 	}
 
 	public update(dt: number): void {

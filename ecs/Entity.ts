@@ -1,5 +1,5 @@
 import Component from "./Component";
-import TemplateGame from "../..";
+import ChatGame from "../..";
 import CPosition from "../global_components/CPosition";
 
 export default abstract class Entity {
@@ -126,7 +126,7 @@ export default abstract class Entity {
 	//#region life-cycle
 
 	public load(): void {
-		TemplateGame.Instance.LoadRessources(this.urlsToLoad, () => {
+		ChatGame.Instance.LoadRessources(this.urlsToLoad, () => {
 			this.onReady();
 		});
 	}
