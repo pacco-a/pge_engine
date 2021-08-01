@@ -12,7 +12,7 @@ export default abstract class Component {
 	public abstract readonly dependentComponent: string[];
 
 	/** L'entitée qui détient ce component */
-	protected _parentEntity: Entity | undefined = undefined;
+	protected _parentEntity!: Entity;
 
 	/**
 	 * Défini l'entitée parente. Ne doit être utilisée que dans
