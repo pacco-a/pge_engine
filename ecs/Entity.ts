@@ -138,7 +138,6 @@ export default abstract class Entity {
 	 * @param dt Le delta est égal à 1 avec un framerate habituel (60), supérieur si le framerate diminue, inférieur s'il augmente.
 	 */
 	public superupdate(dt: number): void {
-		// console.log(dt);
 		for (const entity of this._childEntities) {
 			if (entity.isReady) {
 				entity.superupdate(dt);

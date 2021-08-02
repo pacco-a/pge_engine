@@ -58,7 +58,7 @@ export default class CSprite extends Component {
 			);
 		}
 		// ajouter le sprite dans le jeu
-		console.log("1");
+
 		ChatGame.Instance.AddToStage(this._spriteOrder, this._sprite);
 	}
 

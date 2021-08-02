@@ -25,14 +25,17 @@ export default class Game {
 	// pixi ticker
 	protected ticker: PIXI.Ticker;
 	// loader
-	protected loader: PIXI.Loader;
+	protected loader!: PIXI.Loader;
 
 	// entities
 	private _entities: Entity[] = [];
 
+	private _config: IGameConfig;
+
 	public static Instance: Game;
 
 	constructor(config: IGameConfig) {
+		this._config = config;
 		// singleton
 		Game.Instance = this;
 
@@ -68,19 +71,6 @@ export default class Game {
 			this.update(this.ticker.deltaTime);
 			// draw
 			this.draw();
-		});
-
-		// load ressources THEN call create
-
-		this.loader = new PIXI.Loader();
-		for (const toload of config.toLoad) {
-			this.loader.add(toload.name, toload.url);
-		}
-
-		this.loader.load(() => {
-			this.create();
-			this.renderObjectsToDisplay();
-			this.start();
 		});
 	}
 
@@ -137,7 +127,18 @@ export default class Game {
 	 * executer cette fonction à la fin de create().
 	 */
 	public start() {
-		this.ticker.start();
+		// load ressources THEN call create
+
+		this.loader = new PIXI.Loader();
+		for (const toload of this._config.toLoad) {
+			this.loader.add(toload.name, toload.url);
+		}
+
+		this.loader.load(() => {
+			this.create();
+			this.renderObjectsToDisplay();
+			this.ticker.start();
+		});
 	}
 
 	private renderObjectsToDisplay(): void {
