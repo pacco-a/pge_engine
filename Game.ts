@@ -7,6 +7,7 @@ export default class Game {
 	protected renderer: PIXI.Renderer;
 	private _stage: PIXI.Container;
 	protected graphics: PIXI.Graphics;
+	public deltaMS: number = 0;
 
 	// planckjs world
 	private world: pl.World;
@@ -28,7 +29,7 @@ export default class Game {
 	protected loader!: PIXI.Loader;
 
 	// entities
-	private _entities: Entity[] = [];
+	protected _entities: Entity[] = [];
 
 	private _config: IGameConfig;
 
@@ -67,6 +68,8 @@ export default class Game {
 
 		this.ticker = new PIXI.Ticker();
 		this.ticker.add(() => {
+			this.deltaMS = this.ticker.deltaMS / 1000;
+
 			// update
 			this.update(this.ticker.deltaTime);
 			// draw
@@ -109,9 +112,29 @@ export default class Game {
 	}
 
 	protected removeEntity(entityToRemove: Entity): void {
+		for (const component of entityToRemove.getComponents()) {
+			for (const displayObj of component.renderedObjects) {
+				this.RemoveToStage(displayObj);
+			}
+		}
+
 		this._entities = this._entities.filter((entity) => {
 			return entity != entityToRemove;
 		});
+	}
+
+	/** Supprime toutes les entitées actuellement présentes dans le jeu.
+	 * (Elle ne seront plus update et leurs renderedObjects supprimés du stage).
+	 */
+	protected removeAllEntities() {
+		for (const entity of this._entities) {
+			for (const component of entity.getComponents()) {
+				for (const displayObj of component.renderedObjects) {
+					this.RemoveToStage(displayObj);
+				}
+			}
+		}
+		this._entities = [];
 	}
 
 	/**
@@ -192,6 +215,10 @@ export default class Game {
 	public AddToStage(order: number, object: PIXI.DisplayObject) {
 		this.toDisplayObjects.push({ order: order, object: object });
 		this.renderObjectsToDisplay();
+	}
+
+	public RemoveToStage(object: PIXI.DisplayObject) {
+		this._stage.removeChild(object);
 	}
 	//#endregion
 

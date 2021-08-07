@@ -1,3 +1,4 @@
+import * as PIXI from "pixi.js";
 import Entity from "./Entity";
 import ChatGame from "../../index";
 
@@ -10,6 +11,12 @@ export default abstract class Component {
 
 	/** Nom des components necessaire au fontionnement de celui ci */
 	public abstract readonly dependentComponent: string[];
+
+	/** Liste des display objects (pixijs) rendu par le component, utile pour supprimer une entitée du visuel */
+	protected _renderedObjects: PIXI.DisplayObject[] = [];
+	public get renderedObjects(): PIXI.DisplayObject[] {
+		return this._renderedObjects;
+	}
 
 	/** L'entitée qui détient ce component */
 	protected _parentEntity!: Entity;
